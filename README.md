@@ -6,6 +6,8 @@ TrampoMemo organiza materiais de uma busca profissional e transforma documentos 
 
 > TrampoMemo modela o ciclo de vida do conhecimento, em vez de expor detalhes de implementação de IA.
 
+<img width="1672" height="941" alt="image" src="https://github.com/user-attachments/assets/61ab85cc-232f-47a7-b4ce-0b9d5472b407" />
+
 ## O problema
 
 Durante uma busca de emprego, a quantidade de informação cresce rápido.
