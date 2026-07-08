@@ -6,7 +6,9 @@ TrampoMemo organiza materiais de uma busca profissional e transforma documentos 
 
 > TrampoMemo modela o ciclo de vida do conhecimento, em vez de expor detalhes de implementação de IA.
 
-<img width="1672" height="941" alt="image" src="https://github.com/user-attachments/assets/61ab85cc-232f-47a7-b4ce-0b9d5472b407" />
+## Demonstração
+
+![Demonstração do TrampoMemo: Source vira SourceContent, Chunk, Memory, Evidence e Answer](assets/trampomemo-product-demo.gif)
 
 ## O problema
 
@@ -135,12 +137,13 @@ Essa escolha deixa a arquitetura mais fácil de entender, testar, evoluir e expl
 - SQLAlchemy 2.x
 - Alembic
 - PostgreSQL
+- pgvector
 - uv
 - pytest
 - Ruff
 - pypdf
 
-O MVP usa provedores determinísticos locais para construção de Memory e Answer. Isso mantém o projeto testável sem chaves de API e deixa claro onde provedores reais entram no futuro.
+O projeto usa provedores determinísticos locais por padrão e também suporta provedores OpenAI para embeddings e geração de respostas. A troca acontece por configuração, sem alterar domínio, rotas ou serviços.
 
 ## Executando o projeto
 
@@ -148,7 +151,7 @@ O MVP usa provedores determinísticos locais para construção de Memory e Answe
 
 - Python 3.14
 - uv
-- PostgreSQL para execução local completa
+- PostgreSQL com extensão pgvector para execução local completa
 
 ### Instalação
 
@@ -158,6 +161,25 @@ cp .env.example .env
 ```
 
 Edite `.env` se a sua conexão local com PostgreSQL for diferente da configuração de exemplo.
+
+Por padrão, o projeto roda sem chaves externas:
+
+```env
+EMBEDDING_PROVIDER=local
+LLM_PROVIDER=local
+```
+
+Para usar provedores OpenAI:
+
+```env
+EMBEDDING_PROVIDER=openai
+LLM_PROVIDER=openai
+OPENAI_API_KEY=sk-...
+OPENAI_EMBEDDING_MODEL=text-embedding-3-small
+OPENAI_LLM_MODEL=gpt-5.4-mini
+```
+
+Mesmo com provedores reais, a linguagem do produto não muda. O provedor gera vetores ou texto; a aplicação continua construindo Memory, Evidence e Answer.
 
 ### Migrações
 
@@ -197,7 +219,11 @@ O projeto prioriza comportamento determinístico, rastreabilidade e limites arqu
 - `Ruff` mantém lint e formatação consistentes.
 - `Alembic` registra a evolução do banco de dados.
 - Provedores locais determinísticos permitem testar sem serviços externos.
+- Provedores OpenAI permitem executar o mesmo fluxo com modelos reais em produção.
+- PostgreSQL com pgvector persiste vetores e executa a busca vetorial usada para construir Evidence.
 - A aplicação mantém fronteiras claras entre domínio, infraestrutura e provedores.
+
+O armazenamento vetorial aceita dimensões diferentes por provider. Quando uma nova dimensão passa a ser usada em produção, o caminho recomendado é adicionar uma migração explícita de índice para essa dimensão, mantendo Memory como conceito de domínio e pgvector como detalhe de infraestrutura.
 
 Verificação de qualidade:
 
@@ -217,9 +243,7 @@ importar conhecimento -> construir memória -> selecionar evidências -> gerar r
 
 Próximas evoluções possíveis:
 
-- provedores reais de embeddings;
-- provedores de LLM como OpenAI ou Gemini;
-- armazenamento vetorial com pgvector;
+- provedores adicionais como Gemini ou modelos locais;
 - busca híbrida;
 - integração com Gmail;
 - integração com LinkedIn;

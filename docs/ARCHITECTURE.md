@@ -194,6 +194,8 @@ Memory is the business concept. Embedding generation is an infrastructure concer
 
 The provider generates vectors. The application builds Memory.
 
+Concrete providers are selected through configuration at the application boundary. Changing from a deterministic local provider to a production provider must not change Source, SourceContent, Chunk, Memory, Evidence, or Answer.
+
 This module enables concept search, such as connecting "messaging" with RabbitMQ, Kafka, Amazon SQS, BullMQ, event queues, or asynchronous communication.
 
 ### 4.5 Metadata Store Module

@@ -332,9 +332,7 @@ The project is about traceable memory. Keeping source records, status, chunks, M
 
 ## Decision
 
-Use pgvector as the preferred MVP vector storage strategy when Memory construction is introduced.
-
-Milestone 1 will not use vector storage.
+Use pgvector as the official vector storage and similarity search strategy for Memory.
 
 ## Context
 
@@ -348,6 +346,8 @@ The product requires tight traceability between source documents, chunks, Memory
 
 pgvector allows vector search inside PostgreSQL, keeping vectors near source metadata and relational context.
 
+The repository layer owns pgvector-specific SQL, distance operators, and indexing. Memory remains the product concept; vectors remain infrastructure data used to build and search Memory.
+
 ### Dedicated vector databases
 
 Dedicated vector databases can provide specialized vector search capabilities, scaling characteristics, and search features.
@@ -358,6 +358,14 @@ pgvector best fits the MVP because it keeps vector-backed Memory close to produc
 
 This supports evidence-first answers. Internal search should not become disconnected from the source truth that Evidence must preserve. A unified data layer is easier to explain, test, and operate for the MVP.
 
+The project uses cosine distance for vector similarity. Cosine distance compares direction rather than raw magnitude, which is a better default for embedding-style vectors and remains compatible with future production embedding providers.
+
+The project uses an HNSW index for Memory vectors. HNSW has higher memory and build-time costs than IVFFlat, but it gives a better speed/recall trade-off and does not require a training step before index creation. That makes it a better fit for an incremental product where Memory records arrive over time.
+
+The pgvector column is not fixed to one provider dimension. Memory records preserve their dimensions, and repository queries compare vectors only against Memory records with the same dimensionality.
+
+Production dimensions should still be handled intentionally. When a new provider dimension becomes part of production usage, the project should add an explicit pgvector index migration for that dimension instead of relying on accidental full scans.
+
 Dedicated vector databases remain a future option if scale or Evidence construction requirements justify them.
 
 ## Trade-offs
@@ -365,6 +373,7 @@ Dedicated vector databases remain a future option if scale or Evidence construct
 - Dedicated vector databases may outperform pgvector for some large-scale or specialized workloads.
 - pgvector keeps more responsibility inside PostgreSQL.
 - The team must still preserve the conceptual boundary between product Memory and vector storage infrastructure even if they share the same database.
+- SQLite cannot run pgvector; tests use a deterministic repository fallback while production targets PostgreSQL.
 
 ## ADR-010: Background Processing
 
@@ -454,6 +463,8 @@ Own an internal embedding provider abstraction.
 
 Do not couple core architecture directly to a RAG framework or provider SDK.
 
+Provider selection is configuration-driven. The local deterministic provider remains the default for development and tests, while OpenAI can be enabled without changing domain code.
+
 ## Context
 
 Embeddings are an infrastructure mechanism used to build Memory. They are not a business domain entity in TrampoMemo.
@@ -482,6 +493,8 @@ The project should teach that embedding generation is one infrastructure step in
 
 The provider generates vectors. The application builds Memory.
 
+Provider factories create the concrete provider from settings. Application services depend on the provider boundary, not on concrete provider classes.
+
 ## Trade-offs
 
 - An internal abstraction must be designed carefully to avoid becoming a vague wrapper.
@@ -497,6 +510,8 @@ Own an internal LLM provider abstraction.
 Avoid coupling core product behavior to LangChain, LlamaIndex, or similar frameworks.
 
 The project owns the concepts. Providers are infrastructure details.
+
+Provider selection is configuration-driven. The local deterministic provider remains the default, while OpenAI can be enabled for production answer generation without changing Answer construction.
 
 ## Context
 
@@ -527,6 +542,8 @@ The product's value is not "use an LLM." The value is memory-first, Evidence-fir
 An internal abstraction keeps prompt assembly, evidence policy, unsupported-answer behavior, and provider calls separate. The LLM provider receives a constrained request from the product; it does not own Memory, Evidence construction, evidence selection, or answer policy.
 
 This protects the architecture from provider lock-in and framework-shaped design. Frameworks may be evaluated later for narrow tasks, but they should not define the core architecture.
+
+Provider factories create concrete LLM providers from settings. Prompt construction remains owned by the application; the provider only transforms prompts into generated text.
 
 ## Trade-offs
 
