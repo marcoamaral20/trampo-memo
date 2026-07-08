@@ -1,0 +1,1 @@
+"""Answer construction for TrampoMemo."""
