@@ -1,7 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from trampomemo.sources.models import SourceContent
+from trampomemo.source_content.models import SourceContent
 
 
 class SourceContentRepository:

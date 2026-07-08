@@ -1,7 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from trampomemo.sources.models import Evidence
+from trampomemo.evidence.models import Evidence
 
 
 class EvidenceRepository:

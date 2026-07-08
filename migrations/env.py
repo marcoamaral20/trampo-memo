@@ -7,8 +7,8 @@ from sqlalchemy import engine_from_config, pool
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from trampomemo.config import Settings
-from trampomemo.sources.models import Base
+from trampomemo.core.config import Settings
+from trampomemo.core.models import Base
 
 config = context.config
 config.set_main_option("sqlalchemy.url", Settings().database_url)

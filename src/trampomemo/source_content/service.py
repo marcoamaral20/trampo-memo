@@ -1,6 +1,7 @@
-from trampomemo.sources.models import SourceContent, SourceContentStatus, SourceStatus
-from trampomemo.sources.source_content_repository import SourceContentRepository
-from trampomemo.sources.source_extractors import SourceExtractorRegistry
+from trampomemo.source_content.extractors import SourceExtractorRegistry
+from trampomemo.source_content.models import SourceContent, SourceContentStatus
+from trampomemo.source_content.repository import SourceContentRepository
+from trampomemo.sources.models import SourceStatus
 from trampomemo.sources.source_repository import SourceRepository
 from trampomemo.sources.source_storage import SourceStorage
 

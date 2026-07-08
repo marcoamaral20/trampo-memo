@@ -1,10 +1,11 @@
 from uuid import NAMESPACE_URL, uuid5
 
-from trampomemo.sources.chunk_repository import ChunkRepository
-from trampomemo.sources.models import Chunk, SourceContentStatus
-from trampomemo.sources.source_chunker import build_chunk_candidates
-from trampomemo.sources.source_content_repository import SourceContentRepository
-from trampomemo.sources.source_content_service import (
+from trampomemo.chunks.chunker import build_chunk_candidates
+from trampomemo.chunks.models import Chunk
+from trampomemo.chunks.repository import ChunkRepository
+from trampomemo.source_content.models import SourceContentStatus
+from trampomemo.source_content.repository import SourceContentRepository
+from trampomemo.source_content.service import (
     SourceContentNotFoundError,
     SourceNotFoundError,
 )

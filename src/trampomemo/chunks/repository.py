@@ -1,7 +1,7 @@
 from sqlalchemy import delete, select
 from sqlalchemy.orm import Session
 
-from trampomemo.sources.models import Chunk
+from trampomemo.chunks.models import Chunk
 
 
 class ChunkRepository:

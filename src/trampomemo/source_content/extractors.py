@@ -4,9 +4,9 @@ from pathlib import Path
 
 from pypdf import PdfReader
 
+from trampomemo.source_content.text_normalization import normalize_source_text
 from trampomemo.sources.models import Source, SourceOrigin
 from trampomemo.sources.source_storage import SourceStorage
-from trampomemo.sources.text_normalization import normalize_source_text
 
 
 @dataclass(frozen=True)

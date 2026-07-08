@@ -3,18 +3,13 @@ from datetime import datetime
 from pydantic import BaseModel, ConfigDict
 
 
-class SourceResponse(BaseModel):
+class SourceContentResponse(BaseModel):
     id: str
-    source_type: str
-    source_origin: str
-    title: str
-    origin: str | None
-    original_filename: str | None
-    content_type: str | None
-    storage_uri: str | None
+    source_id: str
+    text: str
     status: str
-    content_status: str
     failure_reason: str | None
+    character_count: int
     created_at: datetime
     updated_at: datetime
 

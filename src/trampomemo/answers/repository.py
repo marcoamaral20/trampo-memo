@@ -1,7 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from trampomemo.sources.models import Answer
+from trampomemo.answers.models import Answer
 
 
 class AnswerRepository:

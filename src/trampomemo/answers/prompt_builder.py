@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from trampomemo.sources.models import Evidence
+from trampomemo.evidence.models import Evidence
 
 SYSTEM_PROMPT = (
     "You answer job search questions using only the supplied Evidence. "

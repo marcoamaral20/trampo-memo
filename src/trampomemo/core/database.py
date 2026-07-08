@@ -3,7 +3,7 @@ from collections.abc import Generator
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 
-from trampomemo.config import Settings
+from trampomemo.core.config import Settings
 
 
 def create_session_factory(database_url: str | None = None):
