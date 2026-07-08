@@ -3,8 +3,8 @@ from pathlib import Path
 import pytest
 from httpx import ASGITransport, AsyncClient
 
+from trampomemo.core.models import Base
 from trampomemo.main import create_app
-from trampomemo.sources.models import Base
 
 
 def setup_app(test_session_factory, tmp_path: Path):
