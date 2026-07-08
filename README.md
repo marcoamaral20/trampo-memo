@@ -6,9 +6,8 @@ TrampoMemo organiza materiais de uma busca profissional e transforma documentos 
 
 > TrampoMemo modela o ciclo de vida do conhecimento, em vez de expor detalhes de implementação de IA.
 
-## Demonstração
+![Ilustração do TrampoMemo: Conteúdos como PDF, descrição de vagas, e-mails e feedbacks são transformados em memória para você acessa-las quando quiser](assets/trampo-memo.png)
 
-![Demonstração do TrampoMemo: Source vira SourceContent, Chunk, Memory, Evidence e Answer](assets/trampomemo-product-demo.gif)
 
 ## O problema
 
@@ -39,6 +38,10 @@ Exemplos:
 - Quais empresas mencionaram Docker e Kubernetes?
 
 Busca por palavra-chave ajuda pouco quando o mesmo conceito aparece escrito de formas diferentes. `Messaging`, `RabbitMQ`, `Kafka`, `Amazon SQS` e `BullMQ` podem representar uma ideia próxima, mas uma busca tradicional trata tudo como se fossem coisas desconectadas.
+
+## Demonstração
+
+![Demonstração do TrampoMemo: Source vira SourceContent, Chunk, Memory, Evidence e Answer](assets/trampomemo-product-demo.gif)
 
 ## A ideia
 
