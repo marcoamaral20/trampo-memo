@@ -1,76 +1,175 @@
 # TrampoMemo
 
-TrampoMemo is an AI-powered memory for job search materials.
+Uma memória inteligente para quem está procurando emprego.
 
-It helps a user import resumes, job descriptions, company notes, recruiter conversations, interview feedback, personal notes, and similar materials, then ask grounded questions over that material.
+TrampoMemo organiza materiais de uma busca profissional e transforma documentos soltos em conhecimento consultável, rastreável e explicável.
 
-The core domain flow is:
+> TrampoMemo modela o ciclo de vida do conhecimento, em vez de expor detalhes de implementação de IA.
+
+## O problema
+
+Durante uma busca de emprego, a quantidade de informação cresce rápido.
+
+Depois de algumas semanas, é comum ter:
+
+- currículos em versões diferentes;
+- descrições de vagas;
+- conversas com recrutadores;
+- feedbacks de entrevistas;
+- anotações pessoais;
+- informações sobre empresas;
+- perguntas já respondidas em processos anteriores;
+- PDFs, Markdown, textos copiados e e-mails exportados.
+
+No começo, encontrar um documento ainda é simples.
+
+O problema real aparece depois: encontrar uma informação específica dentro de tudo isso.
+
+Exemplos:
+
+- Quais empresas pediram AWS Lambda?
+- Quais vagas exigiam inglês?
+- Qual recrutador falou sobre trabalho remoto?
+- Eu já respondi essa pergunta de entrevista antes?
+- Quais entrevistas falaram sobre system design?
+- Quais empresas mencionaram Docker e Kubernetes?
+
+Busca por palavra-chave ajuda pouco quando o mesmo conceito aparece escrito de formas diferentes. `Messaging`, `RabbitMQ`, `Kafka`, `Amazon SQS` e `BullMQ` podem representar uma ideia próxima, mas uma busca tradicional trata tudo como se fossem coisas desconectadas.
+
+## A ideia
+
+TrampoMemo nasce de uma ideia simples:
+
+em vez de procurar documentos, o usuário deveria consultar a própria memória da sua busca de emprego.
+
+O projeto importa materiais heterogêneos, preserva sua origem, transforma o conteúdo em unidades menores, constrói uma memória pesquisável e responde perguntas apenas quando encontra evidências nos materiais do usuário.
+
+O objetivo não é criar mais um chatbot.
+
+O objetivo é mostrar como uma aplicação pode construir memória, selecionar evidências e só então gerar uma resposta.
+
+## Como funciona
+
+```mermaid
+graph TD
+    Source["Source"]
+    SourceContent["SourceContent"]
+    Chunk["Chunk"]
+    Memory["Memory"]
+    Evidence["Evidence"]
+    Answer["Answer"]
+
+    Source --> SourceContent
+    SourceContent --> Chunk
+    Chunk --> Memory
+    Memory --> Evidence
+    Evidence --> Answer
+```
+
+### Source
+
+Representa qualquer material que o usuário quer que o sistema lembre.
+
+Pode ser um currículo, uma descrição de vaga, uma conversa com recrutador, um feedback de entrevista, uma anotação pessoal, um e-mail exportado, um PDF, um Markdown ou um texto colado diretamente.
+
+### SourceContent
+
+É o conteúdo legível extraído de uma Source.
+
+Essa etapa separa o ato de importar um material do ato de conseguir ler seu conteúdo. Se um PDF não puder ser extraído, isso aparece de forma explícita antes que o sistema tente construir memória a partir dele.
+
+### Chunk
+
+É uma unidade revisável de memória.
+
+Chunks preservam ordem, intervalo de caracteres, relação com a Source original e, quando possível, contexto estrutural como títulos de Markdown. O objetivo é evitar tratar documentos longos como blocos opacos.
+
+### Memory
+
+É a representação pesquisável de um Chunk.
+
+Memory existe independentemente de uma pergunta. Ela representa conhecimento preparado para ser encontrado depois, mas não é uma resposta e não é uma evidência por si só.
+
+### Evidence
+
+É o suporte específico para uma pergunta.
+
+Evidence só existe porque o usuário perguntou algo. A aplicação procura na Memory, seleciona trechos relevantes e registra por que eles foram usados.
+
+### Answer
+
+É a resposta final para o usuário.
+
+Answers são construídas a partir de Evidence, nunca diretamente de Memory. Isso mantém a resposta rastreável até os materiais originais.
+
+## Por que este projeto existe
+
+TrampoMemo não é apenas mais uma demonstração de RAG.
+
+O projeto foi desenhado para ensinar uma arquitetura de memória com responsabilidades claras:
+
+- a aplicação importa e preserva Sources;
+- a aplicação extrai SourceContent;
+- a aplicação cria Chunks;
+- a aplicação constrói Memory;
+- a aplicação seleciona Evidence;
+- o provedor de linguagem apenas transforma Evidence em texto.
+
+Embeddings, busca vetorial, recuperação semântica, provedores de IA e bancos vetoriais são mecanismos de implementação. Eles não definem a linguagem do produto.
+
+O domínio do projeto é:
 
 ```text
 Source -> SourceContent -> Chunk -> Memory -> Evidence -> Answer
 ```
 
-TrampoMemo is not a chatbot-first project. It is a memory system. The application builds Memory, constructs Evidence, and only then asks a language provider to generate an Answer from that Evidence.
+Essa escolha deixa a arquitetura mais fácil de entender, testar, evoluir e explicar.
 
-## MVP Capabilities
+## Tecnologias
 
-- Create Sources from direct text or supported files.
-- Preserve Source identity and import status.
-- Extract reviewable SourceContent.
-- Create reviewable Chunks.
-- Build Memory from Chunks.
-- Construct Evidence from Memory for a user question.
-- Construct Answers from Evidence.
-- Review Sources, SourceContent, Chunks, Memory, Evidence, and Answers through the API.
+- Python 3.14
+- FastAPI
+- Pydantic v2
+- SQLAlchemy 2.x
+- Alembic
+- PostgreSQL
+- uv
+- pytest
+- Ruff
+- pypdf
 
-## Architectural Rules
+O MVP usa provedores determinísticos locais para construção de Memory e Answer. Isso mantém o projeto testável sem chaves de API e deixa claro onde provedores reais entram no futuro.
 
-- Answers are built from Evidence, never directly from Memory.
-- Evidence is question-specific.
-- Memory exists independently of questions.
-- Embedding providers generate vectors as infrastructure.
-- LLM providers generate text from prompts only.
-- Providers do not own Source, Chunk, Memory, Evidence, or Answer.
-- LangChain, LlamaIndex, external AI providers, chat history, agents, and streaming are intentionally out of scope for this MVP.
+## Executando o projeto
 
-## Requirements
+### Pré-requisitos
 
 - Python 3.14
 - uv
-- PostgreSQL for production-shaped local runs
+- PostgreSQL para execução local completa
 
-Tests use an in-memory database and do not require API keys.
-
-## Setup
+### Instalação
 
 ```bash
 uv sync
 cp .env.example .env
 ```
 
-Update `.env` if your local PostgreSQL connection differs from the example.
+Edite `.env` se a sua conexão local com PostgreSQL for diferente da configuração de exemplo.
 
-## Database Migrations
+### Migrações
 
 ```bash
 uv run alembic upgrade head
 ```
 
-## Run The API
+### API local
 
 ```bash
 uv run uvicorn trampomemo.main:app --reload
 ```
 
-## Quality Gate
-
-```bash
-uv run pytest
-uv run ruff check .
-uv run ruff format --check .
-```
-
-## Main API Flow
+### Fluxo principal da API
 
 1. `POST /sources`
 2. `POST /sources/{source_id}/content`
@@ -79,7 +178,7 @@ uv run ruff format --check .
 5. `POST /evidence`
 6. `POST /answers`
 
-Review endpoints are also available:
+Endpoints de revisão:
 
 - `GET /sources`
 - `GET /sources/{source_id}/content`
@@ -88,8 +187,49 @@ Review endpoints are also available:
 - `GET /evidence`
 - `GET /answers`
 
-## Current Providers
+## Qualidade
 
-The MVP uses deterministic local providers for Memory construction and Answer construction.
+O projeto prioriza comportamento determinístico, rastreabilidade e limites arquiteturais explícitos.
 
-These providers are development and testing tools. They make the architecture fully testable without API keys, but they are not semantic production AI models.
+- `pytest` cobre o fluxo completo do MVP.
+- `Ruff` mantém lint e formatação consistentes.
+- `Alembic` registra a evolução do banco de dados.
+- Provedores locais determinísticos permitem testar sem serviços externos.
+- A aplicação mantém fronteiras claras entre domínio, infraestrutura e provedores.
+
+Verificação de qualidade:
+
+```bash
+uv run pytest
+uv run ruff check .
+uv run ruff format --check .
+```
+
+## Roadmap
+
+O MVP prova o ciclo completo de memória:
+
+```text
+importar conhecimento -> construir memória -> selecionar evidências -> gerar resposta
+```
+
+Próximas evoluções possíveis:
+
+- provedores reais de embeddings;
+- provedores de LLM como OpenAI ou Gemini;
+- armazenamento vetorial com pgvector;
+- busca híbrida;
+- integração com Gmail;
+- integração com LinkedIn;
+- OCR para PDFs escaneados;
+- filtros semânticos;
+- observabilidade do pipeline;
+- avaliação de qualidade das respostas.
+
+## Tópicos sugeridos para GitHub
+
+`rag`, `ai-engineering`, `semantic-search`, `knowledge-management`, `job-search`, `fastapi`, `python`, `sqlalchemy`, `alembic`, `pytest`, `llm`, `memory-system`
+
+## Licença
+
+MIT License.
