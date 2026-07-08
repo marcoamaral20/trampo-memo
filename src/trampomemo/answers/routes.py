@@ -3,14 +3,15 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Request, status
 from sqlalchemy.orm import Session
 
-from trampomemo.answers.answer_repository import AnswerRepository
-from trampomemo.answers.answer_service import AnswerService
+from trampomemo.answers.llm_provider import create_llm_provider
+from trampomemo.answers.repository import AnswerRepository
 from trampomemo.answers.schemas import AnswerRequest, AnswerResponse
-from trampomemo.database import session_dependency
-from trampomemo.evidence.evidence_repository import EvidenceRepository
-from trampomemo.evidence.evidence_service import EvidenceService
-from trampomemo.sources.chunk_repository import ChunkRepository
-from trampomemo.sources.memory_repository import MemoryRepository
+from trampomemo.answers.service import AnswerService
+from trampomemo.core.database import session_dependency
+from trampomemo.evidence.repository import EvidenceRepository
+from trampomemo.evidence.service import EvidenceService
+from trampomemo.memory.embedding_provider import create_embedding_provider
+from trampomemo.memory.repository import MemoryRepository
 
 
 def create_answer_router() -> APIRouter:
@@ -20,16 +21,18 @@ def create_answer_router() -> APIRouter:
         yield from session_dependency(request.app.state.session_factory)
 
     def get_answer_service(
+        request: Request,
         session: Annotated[Session, Depends(get_session)],
     ) -> AnswerService:
         evidence_service = EvidenceService(
             memory_repository=MemoryRepository(session),
-            chunk_repository=ChunkRepository(session),
             evidence_repository=EvidenceRepository(session),
+            provider=create_embedding_provider(request.app.state.settings),
         )
         return AnswerService(
             evidence_service=evidence_service,
             answer_repository=AnswerRepository(session),
+            provider=create_llm_provider(request.app.state.settings),
         )
 
     @router.post("", response_model=AnswerResponse, status_code=status.HTTP_201_CREATED)

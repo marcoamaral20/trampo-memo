@@ -3,12 +3,12 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Request, status
 from sqlalchemy.orm import Session
 
-from trampomemo.database import session_dependency
-from trampomemo.evidence.evidence_repository import EvidenceRepository
-from trampomemo.evidence.evidence_service import EvidenceService
+from trampomemo.core.database import session_dependency
+from trampomemo.evidence.repository import EvidenceRepository
 from trampomemo.evidence.schemas import EvidenceRequest, EvidenceResponse
-from trampomemo.sources.chunk_repository import ChunkRepository
-from trampomemo.sources.memory_repository import MemoryRepository
+from trampomemo.evidence.service import EvidenceService
+from trampomemo.memory.embedding_provider import create_embedding_provider
+from trampomemo.memory.repository import MemoryRepository
 
 
 def create_evidence_router() -> APIRouter:
@@ -18,12 +18,13 @@ def create_evidence_router() -> APIRouter:
         yield from session_dependency(request.app.state.session_factory)
 
     def get_evidence_service(
+        request: Request,
         session: Annotated[Session, Depends(get_session)],
     ) -> EvidenceService:
         return EvidenceService(
             memory_repository=MemoryRepository(session),
-            chunk_repository=ChunkRepository(session),
             evidence_repository=EvidenceRepository(session),
+            provider=create_embedding_provider(request.app.state.settings),
         )
 
     @router.post("", response_model=list[EvidenceResponse], status_code=status.HTTP_201_CREATED)
